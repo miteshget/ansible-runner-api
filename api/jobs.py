@@ -104,7 +104,7 @@ def create_job(module, stage):
         f'{settings.base_dir}/'
         f'{settings.scripts_path}/'
         f'{module}/'
-        f'{stage}.sh'
+        f'{stage}.yml'
     )
     if not stage_file.exists():
         logger.error('Stage file not found: %s', stage_file)
@@ -124,7 +124,7 @@ def create_job(module, stage):
         private_data_dir=f'{settings.base_dir}/{settings.scripts_path}',
         artifact_dir=f'{settings.base_dir}/{settings.artifacts_path}',
         extravars=extravars,
-        playbook='main.yml',
+        playbook=f'{module}/{stage}.yml',
         quiet=True,
     )
 
