@@ -167,7 +167,7 @@ def get_job_output(job_id):
     job_output_file = Path(
         f'{settings.base_dir}/'
         f'{settings.jobs_path}/'
-        f'{str(job_id)}/script.out'
+        f'{str(job_id)}/output.txt'
     )
 
     job_output = ''
