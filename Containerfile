@@ -12,5 +12,8 @@ ENV BASE_DIR="/app"
 ENV HOST="0.0.0.0"
 ENV PORT=80
 
+RUN mkdir -p /usr/share/ansible/plugins/action/
+COPY ./ansible-plugins /usr/share/ansible/plugins/
+
 COPY ./api /app/
 CMD ["python", "main.py" ]
