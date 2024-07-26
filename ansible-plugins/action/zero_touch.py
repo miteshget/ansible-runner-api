@@ -98,5 +98,5 @@ class ActionModule(ActionBase):
                     return result
 
         result['skipped'] = True
-        result['msg'] = "Task is skepped due to condition and parameters used"
+        result['msg'] = "Task is skipped due to condition and parameters used"
         return result
