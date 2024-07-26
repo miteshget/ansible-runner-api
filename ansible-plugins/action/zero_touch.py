@@ -57,7 +57,6 @@ class ActionModule(ActionBase):
         if not isinstance(conditions, list):
             conditions = [conditions]
 
-         # ----------------------------------------------
         # Output Directory Path
         output_dir = task_vars.get('job_info_dir', None)
         if output_dir is None:
