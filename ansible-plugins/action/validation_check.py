@@ -50,20 +50,20 @@ EXAMPLES = """
 - name: Write error message and fail the task if inventory file is missing
     validation_check:
     error_msg: "Inventory file does not exist"
-    check: not r_hosts.stat.exists
+    check: r_hosts.stat.exists #(False)
 
 # This message will be written to a file and the task will pass if the inventory file exists
 - name: Write success message if inventory file exists
     validation_check:
     pass_msg: "Inventory file exists"
-    check: r_hosts.stat.exists
+    check: r_hosts.stat.exists #(True)
 
 # If both error_msg and pass_msg are provided, the appropriate message will be used based on the condition
 - name: Write appropriate message based on inventory file presence
     validation_check:
     error_msg: "Inventory file does not exist"
     pass_msg: "Inventory file exists"
-    check: r_hosts.stat.exists
+    check: r_hosts.stat.exists #(True/False)
 """
 
 class ActionModule(ActionBase):
