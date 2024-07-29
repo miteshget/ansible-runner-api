@@ -11,10 +11,57 @@ from ansible.playbook.conditional import Conditional
 from ansible.module_utils.six import string_types
 from ansible.module_utils.parsing.convert_bool import boolean
 
+DOCUMENTATION = """
+        action: validation_check
+        author: Mitesh Sharma <mitsharm@redhat.com>
+        version_added: "2.9"
+        short_description: Validation fail with custom message and write fail message to file 
+        description:
+            - Validation fail with custom message and write fail message to file 
+        options:
+            error_msg:
+                description: Custom message which will be written to file and will fail the task. Required when pass_msg is not used.
+                required: False
+                type: string
+                default: False
+            pass_msg:
+                description: Custom message which will be written to file and will pass. Required when error_msg is not used.
+                required: False
+                type: string
+                default: False
+            check:
+                description: Conditions to test
+                required: True
+                type: List
+                default: False
+                
+"""
+
+EXAMPLES = """
+- name: Get stats of hosts file
+    ansible.builtin.stat:
+    path: /home/rhel/ansible-files/inventory
+    register: r_hosts
+    
+# This message will writen to file and will fail the task
+- name: Write msg and fail the task
+  validation_check:
+    error_msg: "Inventory file does not exist"
+    check: not r_hosts.stat.exists
+
+# This message will writen to file and will pass the task
+- name: Write msg and fail the task
+  validation_check:
+    pass_msg: "Inventory file exist"
+    check: r_hosts.stat.exists
+"""
+
 class ActionModule(ActionBase):
     
-    _VALID_ARGS = frozenset(('error_msg', 'pass_msg', 'condition'))
-    
+    TRANSFERS_FILES = False
+    _VALID_ARGS = frozenset(('error_msg', 'pass_msg', 'check'))
+    _requires_connection = False
+
     def run(self, tmp=None, task_vars=None):
         if task_vars is None:
             task_vars = {}
@@ -22,8 +69,8 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
         del tmp
         
-        if 'condition' not in self._task.args:
-            raise AnsibleError('conditional required in "condition" string')
+        if 'check' not in self._task.args:
+            raise AnsibleError('conditional required in "check" string')
         
         error_msg = None
         pass_msg = None
@@ -53,7 +100,7 @@ class ActionModule(ActionBase):
                 raise AnsibleError('Incorrect type for pass_msg, expected a string or list and got %s' % type(p_message))
         
         # make sure the 'condition' items are a list
-        conditions = self._task.args['condition']
+        conditions = self._task.args['check']
         if not isinstance(conditions, list):
             conditions = [conditions]
 
@@ -97,5 +144,6 @@ class ActionModule(ActionBase):
                     return result
 
         result['skipped'] = True
-        result['msg'] = "Task is skipped due to condition and parameters used"
+        result['condition'] = condition
+        result['msg'] = "Task is skipped due to condition/s"
         return result
