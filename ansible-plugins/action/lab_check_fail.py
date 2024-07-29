@@ -12,24 +12,25 @@ DOCUMENTATION = """
         action: lab_check_fail
         author: Mitesh Sharma <mitsharm@redhat.com>
         version_added: "2.9"
-        short_description: Validation fail with custom message and write fail message to file 
+        short_description: Validation check with custom message and write result to file
         description:
-            - Validation fail with custom message and write fail message to file 
+           - This module write a custom error message is written to a file and the task fails.
         options:
           msg:
-            description: Custom message which will be written to file.
+            description: Custom message to be written to the file.
             required: True
             type: string
             default: False
 """
 
 EXAMPLES = """
-- name: Get stats of hosts file
+- name: Get stats of the inventory file
     ansible.builtin.stat:
     path: /home/rhel/ansible-files/inventory
     register: r_hosts
     
-- name: Write msg and fail the task
+# This message will be written to a file and the task will fail if the inventory file does not exist
+- name: Write error message and fail the task if inventory file is missing
   when: not r_hosts.stat.exists
   lab_check_fail:
     msg: "Inventory file does not exist"
@@ -48,18 +49,22 @@ class ActionModule(ActionBase):
 
         result = super(ActionModule, self).run(tmp, task_vars)
         del tmp  # tmp no longer has any effect
-
-        msg = 'Lab failed'
-        if self._task.args and 'msg' in self._task.args:
+            
+        # Validate 'msg' argument presence
+        if 'msg' not in self._task.args:
+            raise AnsibleError('The "msg" parameter is required.')
+        else:
             msg = self._task.args.get('msg')
-
+        
         # Output Directory Path
         output_dir = task_vars.get('job_info_dir', None)
         if output_dir is None:
             raise AnsibleError("The job_info_dir variable must be defined")
         
-        # Output.txt file path
+        # Output file path
         output_result_path = os.path.join(output_dir, 'output.txt')
+        
+        result['_ansible_verbose_always'] = True
         
         try:
             f = open(output_result_path, 'w')
