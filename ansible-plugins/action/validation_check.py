@@ -61,8 +61,8 @@ EXAMPLES = """
 # If both error_msg and pass_msg are provided, the appropriate message will be used based on the condition
 - name: Write appropriate message based on inventory file presence
     validation_check:
-    error_msg: "Inventory file does not exist"
-    pass_msg: "Inventory file exists"
+    error_msg: "Inventory file does not exist (False)"
+    pass_msg: "Inventory file exists (True)"
     check: r_hosts.stat.exists #(True/False)
 """
 
@@ -140,8 +140,7 @@ class ActionModule(ActionBase):
                     result['condition'] = condition
                     result['msg'] = f"{e_message} : Message written to log"
                     return result
-                
-                if test_result and p_message != None:
+                elif test_result and p_message != None:
                     f = open(output_result_path, 'w')
                     f.write(p_message)
                     result['changed'] = True
@@ -149,13 +148,12 @@ class ActionModule(ActionBase):
                     result['condition'] = condition
                     result['msg'] = f"{p_message} : Message written to log"
                     return result
-                
+                else:
+                    result['skipped'] = True
+                    result['condition'] = condition
+                    return result
+
             except Exception as e:
                     result['failed'] = True
                     result['msg'] = f"Failed to write message to log: {e}"
                     return result
-
-        result['skipped'] = True
-        result['condition'] = condition
-        result['msg'] = "Task is skipped due to conditions not being met"
-        return result
