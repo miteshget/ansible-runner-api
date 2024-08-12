@@ -15,6 +15,11 @@ DOCUMENTATION = """
         short_description: Validation check with custom message and write result to file
         description:
            - This module write a custom error message is written to a file and the task fails.
+        Variables:
+          job_info_dir:
+            description:
+              - job_info_dir global variable should be defined as directory path
+              - where error or pass log output will be written.
         options:
           msg:
             description: Custom message to be written to the file.
@@ -25,7 +30,7 @@ DOCUMENTATION = """
 
 EXAMPLES = """
 - name: Get stats of the inventory file
-    ansible.builtin.stat:
+  ansible.builtin.stat:
     path: /home/rhel/ansible-files/inventory
     register: r_hosts
     

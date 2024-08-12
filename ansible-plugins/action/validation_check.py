@@ -20,6 +20,11 @@ DOCUMENTATION = """
             - This module performs a validation check based on provided conditions.
             - If the condition fails, a custom error message is written to a file and the task fails.
             - If the condition passes, a custom success message is written to a file and the task passes.
+        Variables:
+            job_info_dir:
+                description:
+                  - job_info_dir global variable should be defined as directory path
+                  - where error or pass log output will be written.
         options:
             error_msg:
                 description:
@@ -42,25 +47,25 @@ DOCUMENTATION = """
 
 EXAMPLES = """
 - name: Get stats of the inventory file
-    ansible.builtin.stat:
+  ansible.builtin.stat:
     path: /home/rhel/ansible-files/inventory
     register: r_hosts
 
 # This message will be written to a file and the task will fail if the inventory file does not exist
 - name: Write error message and fail the task if inventory file is missing
-    validation_check:
+  validation_check:
     error_msg: "Inventory file does not exist"
     check: r_hosts.stat.exists #(False)
 
 # This message will be written to a file and the task will pass if the inventory file exists
 - name: Write success message if inventory file exists
-    validation_check:
+  validation_check:
     pass_msg: "Inventory file exists"
     check: r_hosts.stat.exists #(True)
 
 # If both error_msg and pass_msg are provided, the appropriate message will be used based on the condition
 - name: Write appropriate message based on inventory file presence
-    validation_check:
+  validation_check:
     error_msg: "Inventory file does not exist (False)"
     pass_msg: "Inventory file exists (True)"
     check: r_hosts.stat.exists #(True/False)
