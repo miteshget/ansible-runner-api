@@ -1,0 +1,52 @@
+---
+- name: Setup control node
+  hosts: controller
+  gather_facts: false
+  vars:
+    USER: rhel
+  tasks:
+    - name: One time become block
+      become: true
+      block:
+        - name: Remove setup bundle
+          ansible.builtin.file:
+            path: /var/ansible-automation-platform-setup-bundle-2.4-6-x86_64.tar.gz
+            state: absent
+
+        - name: Stop register warning
+          ansible.builtin.replace:
+            path: /etc/yum/pluginconf.d/subscription-manager.conf
+            regexp: 'enabled.*$'
+            replace: 'enabled = 0'
+
+        - name: Remove sudo for rhel
+          ansible.builtin.file:
+            path: /etc/sudoers.d/rhel
+            state: absent
+      rescue:
+        - name: Block already executed
+          ansible.builtin.debug:
+            msg: "Please go on"
+
+    - name: Create ansible-navigator.yml
+      ansible.builtin.copy:
+        content: |
+          ---
+          ansible-navigator:
+            execution-environment:
+              container-engine: podman
+              enabled: false
+              image: quay.io/acme_corp/first_playbook_ee:latest
+              pull:
+                policy: never
+
+            logging:
+              level: debug
+
+            playbook-artifact:
+              save-as: /home/rhel/ansible-files/{playbook_name}-artifact-{time_stamp}.json
+
+        dest: "/home/{{ USER }}/ansible-files/ansible-navigator.yml"
+        owner: "{{ USER }}"
+        group: "{{ USER }}"
+        mode: "0644"
